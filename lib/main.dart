@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:hasura_connect/hasura_connect.dart';
+import 'package:trailz/terms.dart';
 
 void main() {
   runApp(MyApp());
@@ -28,6 +29,21 @@ class _MyApppState extends State<MyAppp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Demo'),
+        actions: [
+          InkWell(
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Icon(Icons.search),
+            ),
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => Terms()));
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
