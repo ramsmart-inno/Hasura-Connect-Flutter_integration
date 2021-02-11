@@ -30,6 +30,12 @@ dependencies:
   cupertino_icons: ^1.0.0
   hasura_connect: ^1.2.2
   webview_flutter:
+  chips_choice: ^2.0.1
+  gql_dio_link:
+  dio: ^3.0.9
+  gql: ^0.12.3
+  gql_link: ^0.3.0
+  gql_exec: ^0.2.4
 
 dev_dependencies:
   flutter_test:
