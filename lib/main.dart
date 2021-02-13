@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:hasura_connect/hasura_connect.dart';
+//import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:trailz/terms.dart';
+
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 
 void main() {
   runApp(MyApp());
@@ -26,6 +29,17 @@ class _MyApppState extends State<MyAppp> {
 
   final repository = HomeRepositoryImpl();
 
+  Future<Null> refreshList() async {
+    await Future.delayed(Duration(seconds: 5));
+
+    setState(() {
+      repository.getTarefas();
+      repository.streamTarefas();
+    });
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,78 +58,80 @@ class _MyApppState extends State<MyAppp> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            new TextField(
-              maxLines: 5,
-              textAlign: TextAlign.center,
-              textAlignVertical: TextAlignVertical.center,
-              controller: myController,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: 'Write your thoughts here',
-              ),
-              //showCursor: false,
-              enableInteractiveSelection: true,
-            ),
-            RaisedButton(
-              onPressed: () {
-                repository.add(myController.text.toString());
-              },
-              child: Text("Submit"),
-            ),
-            SingleChildScrollView(
-              child: Container(
-                width: 400,
-                height: 200,
-                child: FutureBuilder<List<Map>>(
-                    future: repository.getTarefas(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return Text("Erro aconteceu");
-                      } else if (snapshot.hasData) {
-                        final list = snapshot.data;
-                        return ListView.builder(
-                            itemCount: list.length,
-                            itemBuilder: (context, index) => ListTile(
-                                  title: Text(list[index]['name']),
-                                ));
-                      } else {
-                        return Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                    }),
-              ),
-            ),
-            Container(
-              width: 400,
-              height: 200,
-              child: StreamBuilder<List<Map>>(
-                  stream: repository.streamTarefas(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return Text("Erro aconteceu");
-                    } else if (snapshot.hasData) {
-                      final list = snapshot.data;
-                      return ListView.builder(
-                          itemCount: list.length,
-                          itemBuilder: (context, index) => ListTile(
-                                title: Text(list[index]['name']),
-                              ));
-                    } else {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                  }),
-            )
-          ],
-        ),
-      ),
+      body: LiquidPullToRefresh(
+          animSpeedFactor: 4.0,
+          color: Colors.deepOrange,
+          backgroundColor: Colors.white,
+          showChildOpacityTransition: false,
+          child:
+              // Column(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   crossAxisAlignment: CrossAxisAlignment.center,
+              //   children: <Widget>[
+              // new TextField(
+              //   maxLines: 2,
+              //   textAlign: TextAlign.center,
+              //   textAlignVertical: TextAlignVertical.center,
+              //   controller: myController,
+              //   decoration: InputDecoration(
+              //     border: InputBorder.none,
+              //     hintText: 'Write your thoughts here',
+              //   ),
+              //   //showCursor: false,
+              //   enableInteractiveSelection: true,
+              // ),
+              // RaisedButton(
+              //   onPressed: () {
+              //     repository.add(myController.text.toString());
+              //   },
+              //   child: Text("Submit"),
+              // ),
+
+              Container(
+            child: FutureBuilder<List<Map>>(
+                future: repository.getTarefas(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Text("Error Fetching Data");
+                  } else if (snapshot.hasData) {
+                    final list = snapshot.data;
+                    return ListView.builder(
+                        itemCount: list.length,
+                        itemBuilder: (context, index) => ListTile(
+                              title: Text(list[index]['name']),
+                            ));
+                  } else {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                }),
+          ),
+          // Container(
+          //   width: 400,
+          //   height: 200,
+          //   child: StreamBuilder<List<Map>>(
+          //       stream: repository.streamTarefas(),
+          //       builder: (context, snapshot) {
+          //         if (snapshot.hasError) {
+          //           return Text("Error Fetching Data");
+          //         } else if (snapshot.hasData) {
+          //           final list = snapshot.data;
+          //           return ListView.builder(
+          //               itemCount: list.length,
+          //               itemBuilder: (context, index) => ListTile(
+          //                     title: Text(list[index]['name']),
+          //                   ));
+          //         } else {
+          //           return Center(
+          //             child: CircularProgressIndicator(),
+          //           );
+          //         }
+          //       }),
+          // )
+          //   ],
+          // ),
+          onRefresh: refreshList),
     );
   }
 }
